@@ -1,0 +1,219 @@
+package cinema;
+
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class Cinema {
+    private static int rowsC;
+    private static int columnsC;
+    private static int purchased10 = 0;
+    private static int purchased8 = 0;
+    private static int possibleTicketsTotal;
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        //cinema layout
+        char[][] cinema = getCinemaLayout(scanner);
+        fillCinemaLayout(cinema);
+        System.out.println();
+
+        //do-while loop
+        int input;
+        do {
+            showMenu();
+            input = scanner.nextInt();
+            switch (input) {
+                case 1:{
+                    //print cinema layout
+                    printSeatMap(cinema);
+                    break;
+                }
+                case 2: {
+                    //check seat and get ticket price
+                    boolean key;
+                    int[] seat;
+                    do {
+                        seat = getSeat(scanner);
+                        key =  checkSeat(seat,cinema);
+                    } while (key);
+
+                    int price = getTicketPrice(seat, cinema);
+                    System.out.println("Ticket price: $" + price);
+                    System.out.println();
+
+                    //counting for statistics
+                    addOnePurchasedTicket(price);
+
+                    //mark seat in cinema layout
+                    markSeat(seat, cinema);
+                    break;
+                }
+                case 3: {
+                    //statistics of purchase and income
+                    System.out.println("Number of purchased tickets: " + getPurchasedTicketsTotal());
+                    System.out.printf("Percentage: %.2f%%%n",percentagePurchased());
+                    System.out.println("Current income: $" + getCurrentIncome());
+                    System.out.println("Total income: $" + totalIncomeIfAllSold(cinema));
+                    System.out.println();
+                    break;
+                }
+            }
+        } while(input !=0);
+
+        scanner.close();
+    }
+
+    private static void showMenu() {
+        System.out.print("""
+                1. Show the seats
+                2. Buy a ticket
+                3. Statistics
+                0. Exit
+                """);
+    }
+
+    private static int[] getSeat(Scanner scanner) {
+        System.out.println();
+        System.out.println("Enter a row number:");
+        int  row = scanner.nextInt();
+        System.out.println("Enter a seat number in that row:");
+        int seat = scanner.nextInt();
+        return new int[]{row, seat};
+    }
+    private static boolean checkSeat(int[] seat, char[][] cinema) {
+        int i = seat[0]-1;
+        int j = seat[1]-1;
+        char c;
+        try {
+            c = cinema[i][j];
+            System.out.println(c);
+            if ( c != 'S') {
+                System.out.println("That ticket has already been purchased!");
+                return true;
+            }
+            return false;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            System.out.println("Wrong input!");
+        }
+        return true;
+    }
+    private static void markSeat(int[] seat, char[][] cinema) {
+        int i = seat[0] - 1;
+        int j = seat[1] - 1;
+        cinema[i][j] = 'B';
+    }
+
+    private static void addOnePurchasedTicket(int price){
+        if (price == 8) {
+            purchased8 +=1;
+        }
+        if (price == 10) {
+            purchased10 +=1;
+        }
+    }
+    public static int getPurchased10() {
+        return purchased10;
+    }
+    public static int getPurchased8() {
+        return purchased8;
+    }
+    public static int getPurchasedTicketsTotal() {
+        int n1 = getPurchased10();
+        int n2 = getPurchased8();
+        return n1 + n2;
+    }
+    public static int getPossibleTicketsTotal() {
+        return possibleTicketsTotal;
+    }
+    public static void setPossibleTicketsTotal(int possibleTicketsTotal) {
+        Cinema.possibleTicketsTotal = possibleTicketsTotal;
+    }
+    public static int getCurrentIncome() {
+        int sum1 = getPurchased10() * 10;
+        int sum2 = getPurchased8() * 8;
+        return sum1 + sum2;
+    }
+    private static float percentagePurchased() {
+        float purchased = (float) getPurchasedTicketsTotal();
+        float total = (float) getPossibleTicketsTotal();
+        return purchased / total * 100;
+    }
+    private static int totalIncomeIfAllSold(char[][] cinema) {
+        int rowsC = cinema.length;
+        int columnsC = cinema[0].length;
+        int income;
+        if (rowsC * columnsC <= 60) {
+            income = rowsC * columnsC * 10;
+        } else {
+            int frontHalf = rowsC / 2;
+            int secondHalf = rowsC - (rowsC / 2);
+            income = frontHalf * columnsC * 10 + secondHalf * columnsC * 8;
+        }
+        return income;
+    }
+
+    private static int getTicketPrice(int[] seat,char[][] cinema) {
+        int rowsC = cinema.length;
+        int columnsC = cinema[0].length;
+        int  row = seat[0];
+        int frontHalf = rowsC / 2;
+        if (rowsC * columnsC <= 60) {
+            return  10;
+        } else if (row <= frontHalf) {
+            return  10;
+        } else {
+            return 8;
+        }
+    }
+
+    private static char[][] getCinemaLayout(Scanner scanner) {
+        System.out.println("Enter the number of rows:");
+        int rowsC = scanner.nextInt();
+        System.out.println("Enter the number of seats in each row:");
+        int columnsC = scanner.nextInt();
+        setRowsC(rowsC);
+        setColumnsC(columnsC);
+        setPossibleTicketsTotal(rowsC * columnsC);
+        return new char[rowsC][columnsC];
+    }
+    private static void fillCinemaLayout(char[][] cinema) {
+        for (char[] chars : cinema) {
+            Arrays.fill(chars, 'S');
+        }
+    }
+    private static void printSeatMap(char[][] cinema) {
+        int rows = getRowsC();
+        int columns = getColumnsC();
+        System.out.println();
+        System.out.println("Cinema:");
+        for (int col = 0; col <= columns; col++) {
+            if (col == 0){
+                System.out.print(" ");
+            }else {
+                System.out.print(" " + col);
+            }
+        }
+        System.out.println();
+        for (int i = 0; i < rows; i++) {
+            System.out.print(i+1);
+            for (int j = 0; j < columns; j++) {
+                System.out.print(" " + cinema[i][j]);
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    public static int getRowsC() {
+        return rowsC;
+    }
+    public static void setRowsC(int rowsC) {
+        Cinema.rowsC = rowsC;
+    }
+    public static int getColumnsC() {
+        return columnsC;
+    }
+    public static void setColumnsC(int columnsC) {
+        Cinema.columnsC = columnsC;
+    }
+}

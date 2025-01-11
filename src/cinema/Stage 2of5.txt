@@ -1,0 +1,30 @@
+package cinema;
+
+import java.util.Scanner;
+
+public class Cinema {
+
+    public static void main(String[] args) {
+        int rows;
+        int columns;
+        //cinema layout
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the number of rows:");
+        rows = scanner.nextInt();
+        System.out.println("Enter the number of seats in each row:");
+        columns = scanner.nextInt();
+        //tickets price
+        int income;
+        if (rows * columns <= 60) {
+            income = rows * columns * 10;
+            System.out.println("Total income:\n" + "$" + income);
+        } else {
+            int frontHalf = rows / 2;
+            int secondHalf = rows - (rows / 2);
+            income = frontHalf * columns * 10 + secondHalf * columns * 8;
+            System.out.println("Total income:\n" + "$" + income);
+
+        }
+
+    }
+}
